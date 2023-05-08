@@ -4,6 +4,9 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/lexical_cast.hpp>
 #include <memory>
 #include <thread>
 #include <functional>
@@ -26,6 +29,7 @@ private:
     void AcceptClients();
 
     void session(std::shared_ptr<tcp::socket> socket);
-    void requestHandler(net::streambuf &buff);
-    void sendResponse(tcp::socket sock, std::string msg);
+    boost::property_tree::ptree requestToPtree(std::array<char, 1024> &buff, size_t len);
+    void requestHandler(boost::property_tree::ptree &root);
+    void sendResponse(std::shared_ptr<tcp::socket> socket, std::string msg);
 };

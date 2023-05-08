@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "dialog.h"
 #include "connection.h"
+#include <unordered_map>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWidget; }
@@ -22,7 +23,10 @@ private slots:
 
     void on_enterButton_clicked();
 
+    void receiveMessage();
+
 private:
+    std::string username;
     Connection conn{"127.0.0.1", 13};
     Ui::MainWidget *ui;
 };

@@ -133,6 +133,30 @@
       </property>
      </widget>
     </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>50</y>
+       <width>591</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="dialogs">
     <widget class="QTabWidget" name="tabWidget">
@@ -161,45 +185,12 @@
       <attribute name="title">
        <string>Новый диалог</string>
       </attribute>
-      <widget class="QListWidget" name="newDialogsList">
-       <property name="geometry">
-        <rect>
-         <x>447</x>
-         <y>100</y>
-         <width>251</width>
-         <height>300</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="newDialogButton">
-       <property name="geometry">
-        <rect>
-         <x>447</x>
-         <y>420</y>
-         <width>251</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Новый диалог</string>
-       </property>
-      </widget>
       <widget class="QListWidget" name="dialogsList">
        <property name="geometry">
         <rect>
          <x>98</x>
          <y>100</y>
-         <width>251</width>
+         <width>600</width>
          <height>300</height>
         </rect>
        </property>
@@ -212,9 +203,9 @@
       <widget class="QPushButton" name="dialogButton">
        <property name="geometry">
         <rect>
-         <x>98</x>
+         <x>248</x>
          <y>420</y>
-         <width>251</width>
+         <width>300</width>
          <height>40</height>
         </rect>
        </property>

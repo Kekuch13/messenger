@@ -15,7 +15,8 @@ std::string DatabaseManager::connectionString() const {
 }
 
 void DatabaseManager::prepare_statements() {
-    conn.prepare("");
+    conn.prepare("authorization", "SELECT * FROM users WHERE username=$1 AND password=$2");
+    conn.prepare("allDialogs", "SELECT username FROM users");
 }
 
 pqxx::connection &DatabaseManager::GetConn() {
