@@ -22,6 +22,7 @@ create table messeges
     id serial primary key,
     dialog_id int not null,
     username varchar(50) not null,
+    time time default CURRENT_TIME not null,
     CONSTRAINT dialog FOREIGN KEY (dialog_id) REFERENCES dialogs (id) ON DELETE CASCADE,
     CONSTRAINT username FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE
 );
