@@ -1,8 +1,9 @@
 #include <iostream>
-#include "foo.h"
+#include "Server/server.h"
 
 int main() {
-    Foo k;
-    std::cout << "Hello, World!" << std::endl;
+    Server server(8080);
+    server.Run();
+
     return 0;
 }

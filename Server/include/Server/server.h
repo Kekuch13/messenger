@@ -1,23 +1,32 @@
 #pragma once
 
-#include <boost/asio.hpp>
-//#include "connection.h"
-#include <functional>
-#include <string>
+#include "Server/databaseManager.h"
 
-using net = boost::asio;
+#include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <memory>
+#include <thread>
+#include <functional>
+#include <unordered_map>
+
+namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
 class Server {
 private:
     int port;
-    boost::asio::io_context ioc;
-    boost::asio::ip::tcp::acceptor acceptor;
-
-//    std::vector<TCPConnection::pointer> _connections {};
+    net::io_context ioc{1};
+    tcp::acceptor acceptor;
+    DatabaseManager dbManager;
+    std::unordered_map<std::string, tcp::socket> clients;
 public:
-    Server(int port);
+    explicit Server(int port);
 
     int Run();
+private:
     void AcceptClients();
+
+    void session(tcp::socket &socket);
+    void requestHandler(net::streambuf &buff);
+    void sendResponse(tcp::socket sock, std::string msg);
 };
