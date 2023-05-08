@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "dialog.h"
+#include "connection.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWidget; }
@@ -22,6 +23,7 @@ private slots:
     void on_enterButton_clicked();
 
 private:
+    Connection conn{"127.0.0.1", 13};
     Ui::MainWidget *ui;
 };
 #endif // MAINWIDGET_H

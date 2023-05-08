@@ -30,6 +30,12 @@ void MainWidget::on_enterButton_clicked()
 {
     // написать авторизацию
     Dialog* d = new Dialog();
+    try {
+        conn.sendToServer("qwertyhn fghjkl");
+    } catch (std::exception& e) {
+        std:: cerr << e.what() << std::endl;
+    }
+
     ui->tabWidget->insertTab(ui->tabWidget->count(), d, "34567");
     ui->stackedWidget->setCurrentIndex(1);
 }

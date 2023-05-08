@@ -14,11 +14,10 @@ using tcp = boost::asio::ip::tcp;
 
 class Server {
 private:
-    int port;
     net::io_context ioc{1};
     tcp::acceptor acceptor;
     DatabaseManager dbManager;
-    std::unordered_map<std::string, tcp::socket> clients;
+    std::unordered_map<std::string, std::shared_ptr<tcp::socket>> clients;
 public:
     explicit Server(int port);
 
@@ -26,7 +25,7 @@ public:
 private:
     void AcceptClients();
 
-    void session(tcp::socket &socket);
+    void session(std::shared_ptr<tcp::socket> socket);
     void requestHandler(net::streambuf &buff);
     void sendResponse(tcp::socket sock, std::string msg);
 };

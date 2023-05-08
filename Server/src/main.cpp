@@ -2,8 +2,11 @@
 #include "Server/server.h"
 
 int main() {
-    Server server(8080);
-    server.Run();
-
+    try {
+        Server server(13);
+        server.Run();
+    } catch (std::exception& e) {
+        std::cerr << e.what();
+    }
     return 0;
 }

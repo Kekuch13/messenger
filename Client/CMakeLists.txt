@@ -11,9 +11,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Boost 1.81.0 REQUIRED)
 
 set(PROJECT_SOURCES
         main.cpp
+        connection.h
+        connection.cpp
         mainwidget.cpp
         mainwidget.h
         mainwidget.ui
@@ -45,7 +48,9 @@ else()
     endif()
 endif()
 
-target_link_libraries(Client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+include_directories(${Boost_INCLUDE_DIRS})
+
+target_link_libraries(Client PRIVATE ${Boost_LIBRARIES} Qt${QT_VERSION_MAJOR}::Widgets)
 
 set_target_properties(Client PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

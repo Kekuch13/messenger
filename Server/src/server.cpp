@@ -1,9 +1,7 @@
 #include "Server/server.h"
 #include <iostream>
 
-Server::Server(int port) :
-    port(port),
-    acceptor(ioc, tcp::endpoint(tcp::v4(), port)) {}
+Server::Server(int port) : acceptor(ioc, tcp::endpoint(tcp::v4(), port)) {}
 
 int Server::Run() {
     try {
@@ -17,20 +15,32 @@ int Server::Run() {
 
 void Server::AcceptClients() {
     while (true) {
-        auto newConnection = tcp::socket(ioc);
-
-        acceptor.accept(newConnection);
+        std::shared_ptr<tcp::socket> newConnection = std::make_shared<tcp::socket>(ioc) ;
+        acceptor.accept(*newConnection.get());
+//        std::cout << newConnection->is_open() << " ======== " << acceptor.is_open() << std::endl;
         std::cout << "Client accepted!\n";
-        std::thread([this, &newConnection] { return this->session(newConnection); }).detach();
+        std::thread([this, newConnection] { return this->session(newConnection); }).detach();
+//        std::cout << newConnection->is_open() << " ******** " << acceptor.is_open() << std::endl;
     }
 }
 
-void Server::session(tcp::socket &socket) {
+void Server::session(std::shared_ptr<tcp::socket> socket) {
     try {
-        net::streambuf buffer;
+        std::array<char, 1024> buf {};
+        boost::system::error_code ec;
         while (true) {
-            socket.receive(buffer);
-            requestHandler(buffer);
+//            std::cout << socket->is_open() << " ++++++++ " << acceptor.is_open() << std::endl;
+            size_t len = socket->read_some(boost::asio::buffer(buf), ec);
+
+            if (ec == net::error::eof) {
+                // Clean connection cut off
+                break;
+            } else if (ec) {
+                throw boost::system::system_error(ec);
+            }
+
+            std::cout.write(buf.data(), len);
+//            requestHandler(buff);
         }
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
@@ -41,8 +51,8 @@ void Server::sendResponse(tcp::socket sock, std::string msg) {
 
 }
 
-void Server::requestHandler(net::streambuf &buff) {
-    std::string s{net::buffers_begin(buff.data()), net::buffers_end(buff.data())};
-    std::cout << s << "\n";
-
+void Server::requestHandler(net::streambuf& buff) {
+    std::stringstream m;
+    m << std::istream{&buff}.rdbuf();
+    std::cout << m.str() << "\n";
 }
