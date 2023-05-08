@@ -134,7 +134,102 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QWidget" name="page_2"/>
+   <widget class="QWidget" name="dialogs">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>800</width>
+       <height>600</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="createDialog">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <attribute name="title">
+       <string>Новый диалог</string>
+      </attribute>
+      <widget class="QListWidget" name="newDialogsList">
+       <property name="geometry">
+        <rect>
+         <x>447</x>
+         <y>100</y>
+         <width>251</width>
+         <height>300</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="newDialogButton">
+       <property name="geometry">
+        <rect>
+         <x>447</x>
+         <y>420</y>
+         <width>251</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Новый диалог</string>
+       </property>
+      </widget>
+      <widget class="QListWidget" name="dialogsList">
+       <property name="geometry">
+        <rect>
+         <x>98</x>
+         <y>100</y>
+         <width>251</width>
+         <height>300</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="dialogButton">
+       <property name="geometry">
+        <rect>
+         <x>98</x>
+         <y>420</y>
+         <width>251</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Перейти к диалогу</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <resources/>

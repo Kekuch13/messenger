@@ -2,6 +2,7 @@
 #define MAINWIDGET_H
 
 #include <QWidget>
+#include "dialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWidget; }
@@ -18,7 +19,7 @@ public:
 private slots:
     void on_showPassword_stateChanged(int arg1);
 
-    void on_pushButton_clicked();
+    void on_enterButton_clicked();
 
 private:
     Ui::MainWidget *ui;

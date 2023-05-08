@@ -6,6 +6,7 @@ MainWidget::MainWidget(QWidget *parent)
     , ui(new Ui::MainWidget)
 {
     ui->setupUi(this);
+    ui->stackedWidget->setCurrentIndex(0);
     ui->passwordLine->setEchoMode(QLineEdit::Password);
 }
 
@@ -25,8 +26,10 @@ void MainWidget::on_showPassword_stateChanged(int arg1)
 }
 
 
-void MainWidget::on_pushButton_clicked()
+void MainWidget::on_enterButton_clicked()
 {
     // написать авторизацию
-    ui->label->setText("efggn");
+    Dialog* d = new Dialog();
+    ui->tabWidget->insertTab(ui->tabWidget->count(), d, "34567");
+    ui->stackedWidget->setCurrentIndex(1);
 }

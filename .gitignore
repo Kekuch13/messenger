@@ -1,4 +1,7 @@
 build-Client-Desktop_x86_windows_msvc2022_pe_64bit-Debug/
-.git/
+
+Server/.idea/
+Server/cmake-build-debug-visual-studio/
+
 
 Client/CMakeLists.txt.user
