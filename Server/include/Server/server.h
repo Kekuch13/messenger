@@ -24,14 +24,10 @@ private:
     std::unordered_map<std::string, std::shared_ptr<tcp::socket>> clients;
 public:
     explicit Server(int port);
-
     int Run();
 private:
     void AcceptClients();
-
-    void session(std::shared_ptr<tcp::socket> socket);
-    boost::property_tree::ptree requestToPtree(std::array<char, 1024> &buff, size_t len);
+    void session(const std::shared_ptr<tcp::socket> &socket);
     void requestHandler(boost::property_tree::ptree &root);
-    void sendResponse(std::shared_ptr<tcp::socket> socket, std::string msg);
-    void successResponse(std::shared_ptr<tcp::socket> socket);
+    void sendResponse(const std::shared_ptr<tcp::socket> &socket, std::string msg);
 };

@@ -62,14 +62,16 @@ void MainWidget::receiveMessage()
                 dialogs[user] = it->second.get<int>("id");
                 ui->dialogsList->addItem(user.c_str());
             }
-        } else if (responseName == "addNewMessage") {
+        }
+        /*else if (responseName == "addNewMessage") {
             ui->label_5->setText("555555");
             if (openDialogs.contains(root.get<int>("dialog_id"))) {
                 openDialogs[root.get<int>("dialog_id")]->addMessage(root.get<std::string>("author") + ": " + root.get<std::string>("text"));
                 ui->label_5->setText("66666");
             }
-            emit conn->readyRead();
-        } else if (responseName == "NewDialogs") {
+//            emit conn->readyRead();
+        }*/
+        else if (responseName == "NewDialogs") {
             auto dialogsNode = root.get_child("dialogs");
             for(auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
                 std::string user = it->second.data();
@@ -84,8 +86,15 @@ void MainWidget::receiveMessage()
             openDialogs[id] = dialog;
             ui->newDialogsList->takeItem(ui->newDialogsList->row(item));
             ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-        }
-        else if (responseName == "success") {
+        } else if (responseName == "dialogMessages") {
+            int id = root.get<int>("dialog_id");
+            auto dialogsNode = root.get_child("messages");
+            for(auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
+                std::string author = it->second.get<std::string>("author");
+                std::string text = it->second.get<std::string>("text");
+                openDialogs[id]->addMessage(author + ": " + text);
+            }
+        } else if (responseName == "success") {
             //
         }
     } catch (std::exception& e) {
@@ -93,9 +102,14 @@ void MainWidget::receiveMessage()
     }
 }
 
-void MainWidget::loadMessages()
+void MainWidget::loadMessages(int dialog_id)
 {
+    std::unordered_map<std::string, std::string> data;
+    data["requestName"] = "dialogMessages";
+    data["username"] = username;
+    data["dialog_id"] = std::to_string(dialog_id);
 
+    conn->sendToServer(data);
 }
 
 void MainWidget::on_showPassword_stateChanged(int arg1)
@@ -133,14 +147,13 @@ void MainWidget::on_dialogButton_clicked()
     openDialogs[id] = dialog;
     ui->dialogsList->takeItem(ui->dialogsList->row(item));
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    loadMessages(id);
 }
-
 
 void MainWidget::on_registrationButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(2);
 }
-
 
 void MainWidget::on_createAccountButton_clicked()
 {
@@ -160,7 +173,6 @@ void MainWidget::on_homeButton_clicked()
     ui->stackedWidget->setCurrentIndex(0);
 }
 
-
 void MainWidget::on_newDialogButton_clicked()
 {
     QListWidgetItem* item = ui->newDialogsList->currentItem();
@@ -176,16 +188,15 @@ void MainWidget::on_newDialogButton_clicked()
     conn->sendToServer(data);
 }
 
-
 void MainWidget::on_tabWidget_tabCloseRequested(int index)
 {
     if(index != 0) {
         for (auto& [id, d] : openDialogs) {
             if (ui->tabWidget->indexOf(d) == index) {
-                openDialogs.erase(id);
                 std::string name = ui->tabWidget->tabText(index).toStdString();
                 dialogs[name] = id;
                 ui->dialogsList->addItem(name.c_str());
+                openDialogs.erase(id);
                 break;
             }
         }

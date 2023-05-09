@@ -22,13 +22,12 @@ void Server::AcceptClients() {
     }
 }
 
-void Server::session(std::shared_ptr<tcp::socket> socket) {
+void Server::session(const std::shared_ptr<tcp::socket> &socket) {
     try {
         boost::system::error_code ec;
         while (true) {
             size_t bytes = socket->available();
             if (bytes == 0) continue;
-            std::cout << "Bytes: " << bytes << std::endl;
             std::vector<char> buff(bytes);
             socket->read_some(net::buffer(buff.data(), buff.size()), ec);
             if (ec == net::error::eof) {
@@ -61,13 +60,15 @@ void Server::session(std::shared_ptr<tcp::socket> socket) {
                 } else {
                     sendResponse(socket, "{\"responseName\":\"authorization\",\n\"status\":\"fail\"}");
                 }
-            } else if(requestName == "registration") {
+            } else if (requestName == "registration") {
                 pqxx::work worker(dbManager.GetConn());
                 auto result = worker.exec_prepared("findUser", root.get<std::string>("login"));
                 if (result.size() == 1) {
                     sendResponse(socket, "{\"responseName\":\"registration\",\n\"status\":\"fail\"}");
                 } else {
-                    worker.exec_prepared("registration", root.get<std::string>("login"), root.get<std::string>("password"));
+                    worker.exec_prepared("registration",
+                                         root.get<std::string>("login"),
+                                         root.get<std::string>("password"));
                     sendResponse(socket, "{\"responseName\":\"registration\",\n\"status\":\"success\"}");
                 }
                 worker.commit();
@@ -86,15 +87,7 @@ void Server::session(std::shared_ptr<tcp::socket> socket) {
     }
 }
 
-boost::property_tree::ptree Server::requestToPtree(std::array<char, 1024> &buff, size_t len) {
-    std::stringstream json;
-    json.write(buff.data(), len);
-    boost::property_tree::ptree root;
-    boost::property_tree::read_json(json, root);
-    return root;
-}
-
-void Server::sendResponse(std::shared_ptr<tcp::socket> socket, std::string msg) {
+void Server::sendResponse(const std::shared_ptr<tcp::socket> &socket, std::string msg) {
     try {
         std::cout << msg << "\n";
         boost::system::error_code ec;
@@ -105,13 +98,12 @@ void Server::sendResponse(std::shared_ptr<tcp::socket> socket, std::string msg) 
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }
-
 }
 
 void Server::requestHandler(boost::property_tree::ptree &root) {
     try {
-        std::string requestName = root.get<std::string>("requestName");
-        std::string username = root.get<std::string>("username");
+        auto requestName = root.get<std::string>("requestName");
+        auto username = root.get<std::string>("username");
 
         if (requestName == "getDialogs") {
             pqxx::work worker(dbManager.GetConn());
@@ -141,21 +133,21 @@ void Server::requestHandler(boost::property_tree::ptree &root) {
             worker.exec_prepared("addMessage", dialog_id, username, text);
             worker.commit();
 
-            pqxx::result res = worker.exec_prepared("findRecipient", dialog_id, username);
-            worker.commit();
-            auto recipient = res[0]["recipient"].as<std::string>();
-            if (clients.contains(recipient)) {
-                boost::property_tree::ptree ptree;
-                ptree.put("responseName", "addNewMessage");
-                ptree.put("author", username);
-                ptree.put("dialog_id", dialog_id);
-                ptree.put("text", text);
-
-                std::stringstream data;
-                boost::property_tree::write_json(data, ptree);
-                sendResponse(clients[recipient], data.str());
-            }
-            successResponse(clients[username]);
+//            pqxx::result res = worker.exec_prepared("findRecipient", dialog_id, username);
+//            worker.commit();
+//            auto recipient = res[0]["recipient"].as<std::string>();
+//            if (clients.contains(recipient)) {
+//                boost::property_tree::ptree ptree;
+//                ptree.put("responseName", "addNewMessage");
+//                ptree.put("author", username);
+//                ptree.put("dialog_id", dialog_id);
+//                ptree.put("text", text);
+//
+//                std::stringstream data;
+//                boost::property_tree::write_json(data, ptree);
+//                sendResponse(clients[recipient], data.str());
+//            }
+            sendResponse(clients[username], R"({"responseName":"success"})");
         } else if (requestName == "getNewDialogs") {
             pqxx::work worker(dbManager.GetConn());
             auto result = worker.exec_prepared("newDialogs", username);
@@ -163,10 +155,10 @@ void Server::requestHandler(boost::property_tree::ptree &root) {
 
             boost::property_tree::ptree ptree, children;
             ptree.put("responseName", "NewDialogs");
-            for (pqxx::result::size_type i = 0; i < result.size(); ++i) {
-                if (to_string(result[i][0]) != username) {
+            for (auto &&row : result) {
+                if (to_string(row[0]) != username) {
                     boost::property_tree::ptree child;
-                    child.put("", result[i][0]);
+                    child.put("", row[0]);
                     children.push_back(std::make_pair("", child));
                 }
             }
@@ -182,11 +174,32 @@ void Server::requestHandler(boost::property_tree::ptree &root) {
 
             auto result = worker.exec_prepared("findDialog", username, root.get<std::string>("buddy"));
             worker.commit();
-            if (result.size() == 0) {
+            if (result.empty()) {
                 result = worker.exec_prepared("createDialog", username, root.get<std::string>("buddy"));
                 worker.commit();
             }
             ptree.put("dialog_id", result[0][0].as<std::string>());
+            std::stringstream data;
+            boost::property_tree::write_json(data, ptree);
+            sendResponse(clients[username], data.str());
+        } else if (requestName == "dialogMessages") {
+            int dialog_id = root.get<int>("dialog_id");
+            pqxx::work worker(dbManager.GetConn());
+            auto result = worker.exec_prepared("dialogMessages", dialog_id);
+            worker.commit();
+
+            boost::property_tree::ptree ptree, children;
+            ptree.put("responseName", "dialogMessages");
+            ptree.put("dialog_id", dialog_id);
+            for (pqxx::result::size_type i = 0; i < result.size(); ++i) {
+                boost::property_tree::ptree child;
+                for (pqxx::row::size_type j = 0; j < result[0].size(); ++j) {
+                    child.put(result.column_name(j), result[i][j]);
+                }
+                if (!child.empty()) children.push_back(std::make_pair("", child));
+            }
+            ptree.add_child("messages", children);
+
             std::stringstream data;
             boost::property_tree::write_json(data, ptree);
             sendResponse(clients[username], data.str());
@@ -196,6 +209,3 @@ void Server::requestHandler(boost::property_tree::ptree &root) {
     }
 }
 
-void Server::successResponse(std::shared_ptr<tcp::socket> socket) {
-    sendResponse(socket, "{\"responseName\":\"success\"}");
-}

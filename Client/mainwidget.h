@@ -18,7 +18,7 @@ public:
     MainWidget(QWidget *parent = nullptr);
     ~MainWidget();
 private:
-    void loadMessages();
+    void loadMessages(int dialog_id);
 
 private slots:
     void on_showPassword_stateChanged(int arg1);

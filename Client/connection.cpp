@@ -39,7 +39,6 @@ void Connection::sendToServer(std::unordered_map<std::string, std::string>& data
 }
 
 boost::property_tree::ptree Connection::receiveFromServer() {
-//    std::array<char, 1024> buff{};
     boost::property_tree::ptree root;
     while(true) {
         size_t bytes = socket.available();
@@ -47,15 +46,7 @@ boost::property_tree::ptree Connection::receiveFromServer() {
         std::vector<char> buff(bytes);
         boost::system::error_code ec;
 
-    //    size_t len = socket.read_some(net::buffer(buff), ec);
-
         socket.read_some(net::buffer(buff.data(), buff.size()), ec);
-
-    //    std::stringstream json;
-    //    json.write(buff.data(), len);
-    //    boost::property_tree::ptree root;
-    //    boost::property_tree::read_json(json, root);
-
 
         std::stringstream json;
         for(auto ch : buff) {
