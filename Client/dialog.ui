@@ -72,19 +72,6 @@
     <string/>
    </property>
   </widget>
-  <widget class="QPushButton" name="closeButton">
-   <property name="geometry">
-    <rect>
-     <x>620</x>
-     <y>10</y>
-     <width>130</width>
-     <height>40</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Закрыть диалог</string>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="lineEdit">
    <property name="geometry">
     <rect>

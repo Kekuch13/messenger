@@ -21,7 +21,7 @@ void Dialog::on_sendButton_clicked()
     QString message = ui->lineEdit->text();
 
     if(!message.isEmpty()) {
-        ui->textBrowser->append("You: " + message);
+        ui->textBrowser->append(username.c_str() + ": " + message);
         std::unordered_map<std::string, std::string> data;
         data["requestName"] = "sendNewMessage";
         data["username"] = username;

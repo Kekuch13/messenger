@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="authorization">
     <widget class="QGroupBox" name="groupBox">
@@ -197,6 +197,9 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <property name="tabsClosable">
+      <bool>true</bool>
+     </property>
      <widget class="QWidget" name="createDialog">
       <property name="font">
        <font>
@@ -239,7 +242,7 @@
         <string>Перейти к диалогу</string>
        </property>
       </widget>
-      <widget class="QListWidget" name="newDialogs">
+      <widget class="QListWidget" name="newDialogsList">
        <property name="geometry">
         <rect>
          <x>447</x>

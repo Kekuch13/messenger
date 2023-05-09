@@ -20,11 +20,8 @@ MainWidget::~MainWidget()
     delete ui;
 }
 
-const std::string& MainWidget::getUsername() const {
-    return username;
-}
-
-void MainWidget::receiveMessage() {
+void MainWidget::receiveMessage()
+{
     try {
         ui->label_5->setText("1111111");
         boost::property_tree::ptree root = conn->receiveFromServer();
@@ -41,6 +38,12 @@ void MainWidget::receiveMessage() {
                 data["requestName"] = "getDialogs";
                 data["username"] = username;
                 conn->sendToServer(data);
+
+                data.clear();
+                data["requestName"] = "getNewDialogs";
+                data["username"] = username;
+                conn->sendToServer(data);
+
                 ui->stackedWidget->setCurrentIndex(1);
             } else {
                 ui->label_3->setText("Неверный логин/пароль");
@@ -66,12 +69,33 @@ void MainWidget::receiveMessage() {
                 ui->label_5->setText("66666");
             }
             emit conn->readyRead();
-        } else if (responseName == "success") {
+        } else if (responseName == "NewDialogs") {
+            auto dialogsNode = root.get_child("dialogs");
+            for(auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
+                std::string user = it->second.data();
+                ui->newDialogsList->addItem(user.c_str());
+            }
+        } else if (responseName == "createdDialog") {
+            int id = root.get<int>("dialog_id");
+            QListWidgetItem* item = ui->newDialogsList->currentItem();
+            Dialog* dialog = new Dialog(this, id, username, conn);
+
+            ui->tabWidget->insertTab(ui->tabWidget->count(), dialog, item->text());
+            openDialogs[id] = dialog;
+            ui->newDialogsList->takeItem(ui->newDialogsList->row(item));
+            ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+        }
+        else if (responseName == "success") {
             //
         }
     } catch (std::exception& e) {
         ui->label_4->setText(e.what());
     }
+}
+
+void MainWidget::loadMessages()
+{
+
 }
 
 void MainWidget::on_showPassword_stateChanged(int arg1)
@@ -108,6 +132,7 @@ void MainWidget::on_dialogButton_clicked()
     ui->tabWidget->insertTab(ui->tabWidget->count(), dialog, item->text());
     openDialogs[id] = dialog;
     ui->dialogsList->takeItem(ui->dialogsList->row(item));
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
 }
 
 
@@ -133,5 +158,38 @@ void MainWidget::on_homeButton_clicked()
     ui->loginLineReg->clear();
     ui->passwordLineReg->clear();
     ui->stackedWidget->setCurrentIndex(0);
+}
+
+
+void MainWidget::on_newDialogButton_clicked()
+{
+    QListWidgetItem* item = ui->newDialogsList->currentItem();
+    if (!item) {
+        return;
+    }
+
+    std::unordered_map<std::string, std::string> data;
+    data["requestName"] = "createDialog";
+    data["username"] = username;
+    data["buddy"] = item->text().toStdString();
+
+    conn->sendToServer(data);
+}
+
+
+void MainWidget::on_tabWidget_tabCloseRequested(int index)
+{
+    if(index != 0) {
+        for (auto& [id, d] : openDialogs) {
+            if (ui->tabWidget->indexOf(d) == index) {
+                openDialogs.erase(id);
+                std::string name = ui->tabWidget->tabText(index).toStdString();
+                dialogs[name] = id;
+                ui->dialogsList->addItem(name.c_str());
+                break;
+            }
+        }
+        ui->tabWidget->removeTab(index);
+    }
 }
 

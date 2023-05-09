@@ -15,13 +15,10 @@ class MainWidget : public QWidget
     Q_OBJECT
 
 public:
-    std::unordered_map<int, Dialog*> openDialogs;
-
-public:
     MainWidget(QWidget *parent = nullptr);
     ~MainWidget();
-
-    const std::string& getUsername() const;
+private:
+    void loadMessages();
 
 private slots:
     void on_showPassword_stateChanged(int arg1);
@@ -38,12 +35,16 @@ private slots:
 
     void on_homeButton_clicked();
 
+    void on_newDialogButton_clicked();
+
+    void on_tabWidget_tabCloseRequested(int index);
+
 private:
     int c = 1;
     Connection* conn;
     std::string username;
     Ui::MainWidget *ui;
     std::unordered_map<std::string, int> dialogs;
-
+    std::unordered_map<int, Dialog*> openDialogs;
 };
 #endif // MAINWIDGET_H
