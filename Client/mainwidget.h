@@ -32,6 +32,12 @@ private slots:
 
     void on_dialogButton_clicked();
 
+    void on_registrationButton_clicked();
+
+    void on_createAccountButton_clicked();
+
+    void on_homeButton_clicked();
+
 private:
     int c = 1;
     Connection* conn;

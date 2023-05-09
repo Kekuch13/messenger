@@ -26,8 +26,11 @@ const std::string& MainWidget::getUsername() const {
 
 void MainWidget::receiveMessage() {
     try {
+        ui->label_5->setText("1111111");
         boost::property_tree::ptree root = conn->receiveFromServer();
+        ui->label_5->setText("2222222");
         std::string responseName = root.get<std::string>("responseName");
+        ui->label_5->setText("333333");
 
         ui->label_4->setText((responseName + std::to_string(c)).c_str());
         c++;
@@ -42,6 +45,13 @@ void MainWidget::receiveMessage() {
             } else {
                 ui->label_3->setText("Неверный логин/пароль");
             }
+        } else if (responseName == "registration") {
+            if (root.get<std::string>("status") == "success") {
+                ui->stackedWidget->setCurrentIndex(0);
+                ui->label_3->setText("Аккаунт успешно создан");
+            } else {
+                ui->label_8->setText("Логин занят");
+            }
         } else if (responseName == "dialogs") {
             auto dialogsNode = root.get_child("dialogs");
             for(auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
@@ -50,8 +60,10 @@ void MainWidget::receiveMessage() {
                 ui->dialogsList->addItem(user.c_str());
             }
         } else if (responseName == "addNewMessage") {
+            ui->label_5->setText("555555");
             if (openDialogs.contains(root.get<int>("dialog_id"))) {
                 openDialogs[root.get<int>("dialog_id")]->addMessage(root.get<std::string>("author") + ": " + root.get<std::string>("text"));
+                ui->label_5->setText("66666");
             }
             emit conn->readyRead();
         } else if (responseName == "success") {
@@ -96,5 +108,30 @@ void MainWidget::on_dialogButton_clicked()
     ui->tabWidget->insertTab(ui->tabWidget->count(), dialog, item->text());
     openDialogs[id] = dialog;
     ui->dialogsList->takeItem(ui->dialogsList->row(item));
+}
+
+
+void MainWidget::on_registrationButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(2);
+}
+
+
+void MainWidget::on_createAccountButton_clicked()
+{
+    std::unordered_map<std::string, std::string> data;
+    data["requestName"] = "registration";
+    data["login"] = ui->loginLineReg->text().toStdString();
+    data["password"] = ui->passwordLineReg->text().toStdString();
+
+    conn->sendToServer(data);
+}
+
+
+void MainWidget::on_homeButton_clicked()
+{
+    ui->loginLineReg->clear();
+    ui->passwordLineReg->clear();
+    ui->stackedWidget->setCurrentIndex(0);
 }
 

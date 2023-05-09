@@ -15,6 +15,8 @@ std::string DatabaseManager::connectionString() const {
 }
 
 void DatabaseManager::prepare_statements() {
+    conn.prepare("registration", "INSERT INTO users VALUES ($1, $2)");
+    conn.prepare("findUser", "SELECT * from users WHERE username=$1");
     conn.prepare("authorization", "SELECT * FROM users WHERE username=$1 AND password=$2");
     conn.prepare("allDialogs", "SELECT id, username_1 AS username FROM dialogs WHERE username_2=$1 UNION SELECT id, username_2 FROM dialogs WHERE username_1=$1");
 //    conn.prepare("newDialogs", "SELECT username FROM users WHERE username NOT IN (SELECT username_1 FROM dialogs WHERE username_2=$1 UNION SELECT username_2 FROM dialogs WHERE username_1=$1)");

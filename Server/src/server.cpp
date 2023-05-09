@@ -50,7 +50,7 @@ void Server::session(std::shared_ptr<tcp::socket> socket) {
             boost::property_tree::ptree root;
             std::stringstream json;
 
-            for(auto ch : buff) {
+            for (auto ch : buff) {
                 std::cout << ch;
                 json << ch;
             }
@@ -67,12 +67,20 @@ void Server::session(std::shared_ptr<tcp::socket> socket) {
                 worker.commit();
                 if (result.size() == 1) {
                     clients[root.get<std::string>("login")] = socket;
-//                    std::cout << "success\n";
                     sendResponse(socket, "{\"responseName\":\"authorization\",\n\"status\":\"success\"}");
                 } else {
-//                    std::cout << "fail\n";
                     sendResponse(socket, "{\"responseName\":\"authorization\",\n\"status\":\"fail\"}");
                 }
+            } else if(requestName == "registration") {
+                pqxx::work worker(dbManager.GetConn());
+                auto result = worker.exec_prepared("findUser", root.get<std::string>("login"));
+                if (result.size() == 1) {
+                    sendResponse(socket, "{\"responseName\":\"registration\",\n\"status\":\"fail\"}");
+                } else {
+                    worker.exec_prepared("registration", root.get<std::string>("login"), root.get<std::string>("password"));
+                    sendResponse(socket, "{\"responseName\":\"registration\",\n\"status\":\"success\"}");
+                }
+                worker.commit();
             } else {
                 requestHandler(root);
             }
@@ -157,9 +165,13 @@ void Server::requestHandler(boost::property_tree::ptree &root) {
                 boost::property_tree::write_json(data, ptree);
                 sendResponse(clients[recipient], data.str());
             }
-            sendResponse(clients[username], "{\"responseName\":\"success\"}");
+            successResponse(clients[username]);
         }
-    } catch (std::exception& e) {
+    } catch (std::exception &e) {
         std::cerr << e.what();
     }
+}
+
+void Server::successResponse(std::shared_ptr<tcp::socket> socket) {
+    sendResponse(socket, "{\"responseName\":\"success\"}");
 }
