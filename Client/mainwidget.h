@@ -40,7 +40,6 @@ private slots:
     void on_tabWidget_tabCloseRequested(int index);
 
 private:
-    int c = 1;
     Connection* conn;
     std::string username;
     Ui::MainWidget *ui;

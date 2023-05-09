@@ -274,21 +274,14 @@
          <height>81</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 0, 0)</string>
+       </property>
        <property name="text">
         <string/>
        </property>
-      </widget>
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>130</x>
-         <y>500</y>
-         <width>551</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>TextLabel</string>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </widget>

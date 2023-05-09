@@ -23,14 +23,9 @@ MainWidget::~MainWidget()
 void MainWidget::receiveMessage()
 {
     try {
-        ui->label_5->setText("1111111");
         boost::property_tree::ptree root = conn->receiveFromServer();
-        ui->label_5->setText("2222222");
         std::string responseName = root.get<std::string>("responseName");
-        ui->label_5->setText("333333");
 
-        ui->label_4->setText((responseName + std::to_string(c)).c_str());
-        c++;
         if (responseName == "authorization") {
             if (root.get<std::string>("status") == "success") {
                 username = ui->loginLine->text().toStdString();
@@ -64,10 +59,8 @@ void MainWidget::receiveMessage()
             }
         }
         /*else if (responseName == "addNewMessage") {
-            ui->label_5->setText("555555");
             if (openDialogs.contains(root.get<int>("dialog_id"))) {
                 openDialogs[root.get<int>("dialog_id")]->addMessage(root.get<std::string>("author") + ": " + root.get<std::string>("text"));
-                ui->label_5->setText("66666");
             }
 //            emit conn->readyRead();
         }*/
