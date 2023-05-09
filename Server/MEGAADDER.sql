@@ -1,6 +1,6 @@
 drop table if exists users cascade;
 drop table if exists dialogs cascade;
-drop table if exists messeges cascade;
+drop table if exists messages cascade;
 
 create table users
 (
@@ -17,14 +17,15 @@ create table dialogs
     CONSTRAINT user_2 FOREIGN KEY (username_2) REFERENCES users (username) ON DELETE CASCADE
 );
 
-create table messeges
+create table messages
 (
     id serial primary key,
     dialog_id int not null,
-    username varchar(50) not null,
+    author varchar(50) not null,
     time time default CURRENT_TIME not null,
+    text varchar(250) not null,
     CONSTRAINT dialog FOREIGN KEY (dialog_id) REFERENCES dialogs (id) ON DELETE CASCADE,
-    CONSTRAINT username FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE
+    CONSTRAINT username FOREIGN KEY (author) REFERENCES users (username) ON DELETE CASCADE
 );
 
 INSERT INTO users(username, password)
@@ -34,3 +35,14 @@ INSERT INTO users(username, password)
            ('john','john'),
            ('artist','artist'),
            ('nick','nick');
+
+INSERT INTO dialogs(username_1, username_2)
+    VALUES ('keke', 'john'),
+           ('11111', 'john'),
+           ('keke', 'lolo'),
+           ('artist', '11111'),
+           ('artist', 'john'),
+           ('lolo', 'nick'),
+           ('nick', 'keke');
+
+INSERT INTO messages(dialog_id, author, text)

@@ -10,6 +10,11 @@ Connection::Connection(std::string adress, int port) : socket(ioc) {
     }
 }
 
+Connection::~Connection() {
+    boost::system::error_code ec;
+    socket.shutdown(tcp::socket::shutdown_send, ec);
+}
+
 tcp::socket& Connection::getSocket() {
     return socket;
 }
@@ -27,21 +32,38 @@ std::string Connection::toJson(std::unordered_map<std::string, std::string>& dat
 
 void Connection::sendToServer(std::unordered_map<std::string, std::string>& data) {
     std::string msg = toJson(data);
-    socket.send(net::buffer(msg));
+    boost::system::error_code ec;
+    socket.write_some(net::buffer(msg.data(), msg.size()), ec);
 
     emit readyRead();
 }
 
 boost::property_tree::ptree Connection::receiveFromServer() {
-    std::array<char, 1024> buff{};
-    boost::system::error_code ec;
-
-    size_t len = socket.read_some(net::buffer(buff), ec);
-
-    std::stringstream json;
-    json.write(buff.data(), len);
+//    std::array<char, 1024> buff{};
     boost::property_tree::ptree root;
-    boost::property_tree::read_json(json, root);
+    while(true) {
+        size_t bytes = socket.available();
+        if (bytes == 0) continue;
+        std::vector<char> buff(bytes);
+        boost::system::error_code ec;
+
+    //    size_t len = socket.read_some(net::buffer(buff), ec);
+
+        socket.read_some(net::buffer(buff.data(), buff.size()), ec);
+
+    //    std::stringstream json;
+    //    json.write(buff.data(), len);
+    //    boost::property_tree::ptree root;
+    //    boost::property_tree::read_json(json, root);
+
+
+        std::stringstream json;
+        for(auto ch : buff) {
+            json << ch;
+        }
+        boost::property_tree::read_json(json, root);
+        break;
+    }
 
     return root;
 }

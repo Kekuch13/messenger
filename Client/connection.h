@@ -9,6 +9,7 @@
 #include <boost/lexical_cast.hpp>
 #include <unordered_map>
 #include <QObject>
+#include <vector>
 
 namespace net = boost::asio;
 using boost::asio::ip::tcp;
@@ -21,13 +22,16 @@ private:
     net::io_context ioc{1};
     tcp::socket socket;
     tcp::resolver::results_type endpoints;
+
 public:
     Connection(std::string adress, int port);
+    ~Connection();
 
     tcp::socket& getSocket();
     void sendToServer(std::unordered_map<std::string, std::string>& data);
     boost::property_tree::ptree receiveFromServer();
     std::string toJson(std::unordered_map<std::string, std::string>& data);
+
 signals:
     void readyRead();
 };

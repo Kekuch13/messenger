@@ -11,6 +11,7 @@
 #include <thread>
 #include <functional>
 #include <unordered_map>
+#include <vector>
 
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
