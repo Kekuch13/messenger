@@ -24,7 +24,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<tcp::socket>> clients;
 public:
     explicit Server(int port);
-    int Run();
+    void Run();
 private:
     void AcceptClients();
     void session(const std::shared_ptr<tcp::socket> &socket);

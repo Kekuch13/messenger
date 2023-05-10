@@ -3,17 +3,16 @@
 
 Server::Server(int port) : acceptor(ioc, tcp::endpoint(tcp::v4(), port)) {}
 
-int Server::Run() {
+void Server::Run() { // запуск сервера
     try {
         AcceptClients();
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
-        return -1;
+        throw;
     }
-    return 0;
 }
 
-void Server::AcceptClients() {
+void Server::AcceptClients() { // подключение новых клиентов
     while (true) {
         std::shared_ptr<tcp::socket> newConnection = std::make_shared<tcp::socket>(ioc);
         acceptor.accept(*newConnection.get());
@@ -22,7 +21,7 @@ void Server::AcceptClients() {
     }
 }
 
-void Server::session(const std::shared_ptr<tcp::socket> &socket) {
+void Server::session(const std::shared_ptr<tcp::socket> &socket) { // сессия для клиента
     try {
         boost::system::error_code ec;
         while (true) {
@@ -30,6 +29,7 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) {
             if (bytes == 0) continue;
             std::vector<char> buff(bytes);
             socket->read_some(net::buffer(buff.data(), buff.size()), ec);
+
             if (ec == net::error::eof) {
                 break;
             } else if (ec) {
@@ -55,6 +55,7 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) {
                                          root.get<std::string>("password"));
                 worker.commit();
                 if (result.size() == 1) {
+                    // добавляем клиента в список активных клтиентов, если успешно пройдена аутентификация
                     clients[root.get<std::string>("login")] = socket;
                     sendResponse(socket, "{\"responseName\":\"authorization\",\n\"status\":\"success\"}");
                 } else {
@@ -64,6 +65,7 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) {
                 pqxx::work worker(dbManager.GetConn());
                 auto result = worker.exec_prepared("findUser", root.get<std::string>("login"));
                 if (result.size() == 1) {
+                    // если логин уже занят, то отправляем сообщение об ошибке
                     sendResponse(socket, "{\"responseName\":\"registration\",\n\"status\":\"fail\"}");
                 } else {
                     worker.exec_prepared("registration",
@@ -87,7 +89,7 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) {
     }
 }
 
-void Server::sendResponse(const std::shared_ptr<tcp::socket> &socket, std::string msg) {
+void Server::sendResponse(const std::shared_ptr<tcp::socket> &socket, std::string msg) { // отправка ответа клиенту
     try {
         std::cout << msg << "\n";
         boost::system::error_code ec;
@@ -100,7 +102,7 @@ void Server::sendResponse(const std::shared_ptr<tcp::socket> &socket, std::strin
     }
 }
 
-void Server::requestHandler(boost::property_tree::ptree &root) {
+void Server::requestHandler(boost::property_tree::ptree &root) { // обработчик входящих запросов
     try {
         auto requestName = root.get<std::string>("requestName");
         auto username = root.get<std::string>("username");
@@ -147,6 +149,7 @@ void Server::requestHandler(boost::property_tree::ptree &root) {
 //                boost::property_tree::write_json(data, ptree);
 //                sendResponse(clients[recipient], data.str());
 //            }
+
             sendResponse(clients[username], R"({"responseName":"success"})");
         } else if (requestName == "getNewDialogs") {
             pqxx::work worker(dbManager.GetConn());
@@ -208,4 +211,3 @@ void Server::requestHandler(boost::property_tree::ptree &root) {
         std::cerr << e.what() << std::endl;
     }
 }
-

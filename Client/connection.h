@@ -27,7 +27,6 @@ public:
     Connection(std::string adress, int port);
     ~Connection();
 
-    tcp::socket& getSocket();
     void sendToServer(std::unordered_map<std::string, std::string>& data);
     boost::property_tree::ptree receiveFromServer();
     std::string toJson(std::unordered_map<std::string, std::string>& data);

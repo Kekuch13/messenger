@@ -17,12 +17,7 @@ Connection::~Connection()
     socket.shutdown(tcp::socket::shutdown_send, ec);
 }
 
-tcp::socket &Connection::getSocket()
-{
-    return socket;
-}
-
-std::string Connection::toJson(std::unordered_map<std::string, std::string> &data)
+std::string Connection::toJson(std::unordered_map<std::string, std::string> &data) // перевод запроса от клиента в json
 {
     boost::property_tree::ptree root;
     for (const auto& [header, value] : data) {
@@ -33,7 +28,7 @@ std::string Connection::toJson(std::unordered_map<std::string, std::string> &dat
     return str.str();
 }
 
-void Connection::sendToServer(std::unordered_map<std::string, std::string> &data)
+void Connection::sendToServer(std::unordered_map<std::string, std::string> &data) // отправка запросов на сервер
 {
     std::string msg = toJson(data);
     boost::system::error_code ec;
@@ -42,7 +37,7 @@ void Connection::sendToServer(std::unordered_map<std::string, std::string> &data
     emit readyRead();
 }
 
-boost::property_tree::ptree Connection::receiveFromServer()
+boost::property_tree::ptree Connection::receiveFromServer() // прием ответов от сервера
 {
     boost::property_tree::ptree root;
     while (true) {
@@ -53,6 +48,7 @@ boost::property_tree::ptree Connection::receiveFromServer()
 
         socket.read_some(net::buffer(buff.data(), buff.size()), ec);
 
+        // перевод поступившего сообщения из json в boost::property_tree для дельнейшей обработки
         std::stringstream json;
         for (auto ch : buff) {
             json << ch;

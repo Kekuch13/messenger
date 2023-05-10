@@ -16,7 +16,7 @@ Dialog::~Dialog()
     delete ui;
 }
 
-void Dialog::on_sendButton_clicked()
+void Dialog::on_sendButton_clicked() // обработка и отправка введенного сообщения
 {
     QString message = ui->lineEdit->text();
 
@@ -33,6 +33,7 @@ void Dialog::on_sendButton_clicked()
     }
 }
 
-void Dialog::addMessage(std::string msg) {
+void Dialog::addMessage(std::string msg) // добавление сообщения в поле с диалогом
+{
     ui->textBrowser->append(msg.c_str());
 }

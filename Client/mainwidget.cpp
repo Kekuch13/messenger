@@ -19,7 +19,7 @@ MainWidget::~MainWidget()
     delete ui;
 }
 
-void MainWidget::receiveMessage()
+void MainWidget::receiveMessage() // обработчик поступивших запросов от сервера
 {
     try {
         boost::property_tree::ptree root = conn->receiveFromServer();
@@ -87,14 +87,14 @@ void MainWidget::receiveMessage()
                 openDialogs[id]->addMessage(author + ": " + text);
             }
         } else if (responseName == "success") {
-            //
+            // заглушка, как и сам ответ от сервера с именем success
         }
     } catch (std::exception &e) {
         ui->label_4->setText(e.what());
     }
 }
 
-void MainWidget::loadMessages(int dialog_id)
+void MainWidget::loadMessages(int dialog_id) // запрос всех сообщений для конкретного диалога
 {
     std::unordered_map<std::string, std::string> data;
     data["requestName"] = "dialogMessages";
@@ -104,7 +104,7 @@ void MainWidget::loadMessages(int dialog_id)
     conn->sendToServer(data);
 }
 
-void MainWidget::on_showPassword_stateChanged(int arg1)
+void MainWidget::on_showPassword_stateChanged(int arg1) // обработчик кнопки "Показать пароль"
 {
     if (arg1 == 2) {
         ui->passwordLine->setEchoMode(QLineEdit::Normal);
@@ -113,7 +113,7 @@ void MainWidget::on_showPassword_stateChanged(int arg1)
     }
 }
 
-void MainWidget::on_enterButton_clicked()
+void MainWidget::on_enterButton_clicked() // обработчик кнопки "Войти"
 {
     std::unordered_map<std::string, std::string> data;
     data["requestName"] = "authorization";
@@ -123,7 +123,7 @@ void MainWidget::on_enterButton_clicked()
     conn->sendToServer(data);
 }
 
-void MainWidget::on_dialogButton_clicked()
+void MainWidget::on_dialogButton_clicked() // обработчик кнопки "Перейти к диалогу"
 {
     QListWidgetItem *item = ui->dialogsList->currentItem();
     if (!item) {
@@ -140,12 +140,12 @@ void MainWidget::on_dialogButton_clicked()
     loadMessages(id);
 }
 
-void MainWidget::on_registrationButton_clicked()
+void MainWidget::on_registrationButton_clicked() // обработчик кнопки "Регистрация"
 {
     ui->stackedWidget->setCurrentIndex(2);
 }
 
-void MainWidget::on_createAccountButton_clicked()
+void MainWidget::on_createAccountButton_clicked() // обработчик кнопки "Создать аккаунт"
 {
     std::unordered_map<std::string, std::string> data;
     data["requestName"] = "registration";
@@ -155,14 +155,14 @@ void MainWidget::on_createAccountButton_clicked()
     conn->sendToServer(data);
 }
 
-void MainWidget::on_homeButton_clicked()
+void MainWidget::on_homeButton_clicked() // обработчик кнопки "Назад" из окна регистрации
 {
     ui->loginLineReg->clear();
     ui->passwordLineReg->clear();
     ui->stackedWidget->setCurrentIndex(0);
 }
 
-void MainWidget::on_newDialogButton_clicked()
+void MainWidget::on_newDialogButton_clicked() // обработчик кнопки "Новый диалог"
 {
     QListWidgetItem *item = ui->newDialogsList->currentItem();
     if (!item) {
@@ -177,9 +177,9 @@ void MainWidget::on_newDialogButton_clicked()
     conn->sendToServer(data);
 }
 
-void MainWidget::on_tabWidget_tabCloseRequested(int index)
+void MainWidget::on_tabWidget_tabCloseRequested(int index) // обработчик закрытия вкладок с диалогами
 {
-    if (index != 0) {
+    if (index != 0) { // вкладку для выбора диалогов нельзя закрыть
         for (auto&[id, d] : openDialogs) {
             if (ui->tabWidget->indexOf(d) == index) {
                 std::string name = ui->tabWidget->tabText(index).toStdString();

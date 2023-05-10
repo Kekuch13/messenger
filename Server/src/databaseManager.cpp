@@ -8,13 +8,13 @@ DatabaseManager::DatabaseManager() : conn(connectionString().c_str()) {
     }
 }
 
-std::string DatabaseManager::connectionString() const {
+std::string DatabaseManager::connectionString() const { // возвращает строку с данными, необходимыми для подключения к БД
     std::string connectionString =
         "host=" + host + " port=" + port + " dbname=" + dbname + " user=" + user + " password=" + password;
     return connectionString;
 }
 
-void DatabaseManager::prepare_statements() {
+void DatabaseManager::prepare_statements() { // SQL-запросы, использующиеся в процессе работы
     conn.prepare("registration", "INSERT INTO users VALUES ($1, $2)");
     conn.prepare("findUser", "SELECT * from users WHERE username=$1");
     conn.prepare("findDialog", "SELECT id\n"

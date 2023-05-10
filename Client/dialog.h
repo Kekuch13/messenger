@@ -18,6 +18,7 @@ public:
     ~Dialog();
 
     void addMessage(std::string msg);
+
 private slots:
     void on_sendButton_clicked();
 
