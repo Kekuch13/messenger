@@ -58,21 +58,21 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) { // сесси
                 if (result.size() == 1) {
                     // добавляем клиента в список активных клтиентов, если успешно пройдена аутентификация
                     clients[root.get<std::string>("login")] = socket;
-                    sendResponse(socket, "{\"responseName\":\"authorization\",\n\"status\":\"success\"}");
+                    sendResponse(socket, "{\n\t\"responseName\":\"authorization\",\n\t\"status\":\"success\"\n}");
                 } else {
-                    sendResponse(socket, "{\"responseName\":\"authorization\",\n\"status\":\"fail\"}");
+                    sendResponse(socket, "{\n\t\"responseName\":\"authorization\",\n\t\"status\":\"fail\"\n}");
                 }
             } else if (requestName == "registration") {
                 pqxx::work worker(dbManager.GetConn());
                 auto result = worker.exec_prepared("findUser", root.get<std::string>("login"));
                 if (result.size() == 1) {
                     // если логин уже занят, то отправляем сообщение об ошибке
-                    sendResponse(socket, "{\"responseName\":\"registration\",\n\"status\":\"fail\"}");
+                    sendResponse(socket, "{\n\t\"responseName\":\"registration\",\n\t\"status\":\"fail\"\n}");
                 } else {
                     worker.exec_prepared("registration",
                                          root.get<std::string>("login"),
                                          root.get<std::string>("password"));
-                    sendResponse(socket, "{\"responseName\":\"registration\",\n\"status\":\"success\"}");
+                    sendResponse(socket, "{\n\t\"responseName\":\"registration\",\n\t\"status\":\"success\"\n}");
                 }
                 worker.commit();
             } else {
@@ -136,22 +136,7 @@ void Server::requestHandler(boost::property_tree::ptree &root) { // обрабо
             worker.exec_prepared("addMessage", dialog_id, username, text);
             worker.commit();
 
-//            pqxx::result res = worker.exec_prepared("findRecipient", dialog_id, username);
-//            worker.commit();
-//            auto recipient = res[0]["recipient"].as<std::string>();
-//            if (clients.contains(recipient)) {
-//                boost::property_tree::ptree ptree;
-//                ptree.put("responseName", "addNewMessage");
-//                ptree.put("author", username);
-//                ptree.put("dialog_id", dialog_id);
-//                ptree.put("text", text);
-//
-//                std::stringstream data;
-//                boost::property_tree::write_json(data, ptree);
-//                sendResponse(clients[recipient], data.str());
-//            }
-
-            sendResponse(clients[username], R"({"responseName":"success"})");
+            sendResponse(clients[username], "{\n\t\"responseName\":\"success\"\n}");
         } else if (requestName == "getNewDialogs") {
             pqxx::work worker(dbManager.GetConn());
             auto result = worker.exec_prepared("newDialogs", username);

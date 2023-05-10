@@ -39,23 +39,20 @@ void Connection::sendToServer(std::unordered_map<std::string, std::string> &data
 
 boost::property_tree::ptree Connection::receiveFromServer() // прием ответов от сервера
 {
-    boost::property_tree::ptree root;
-    while (true) {
-        size_t bytes = socket.available();
-        if (bytes == 0) continue;
-        std::vector<char> buff(bytes);
-        boost::system::error_code ec;
+    socket.wait(socket.wait_read);
+    size_t bytes = socket.available();
+    std::vector<char> buff(bytes);
+    boost::system::error_code ec;
 
-        socket.read_some(net::buffer(buff.data(), buff.size()), ec);
+    socket.read_some(net::buffer(buff.data(), buff.size()), ec);
 
-        // перевод поступившего сообщения из json в boost::property_tree для дельнейшей обработки
-        std::stringstream json;
-        for (auto ch : buff) {
-            json << ch;
-        }
-        boost::property_tree::read_json(json, root);
-        break;
+    // перевод поступившего сообщения из json в boost::property_tree для дельнейшей обработки
+    std::stringstream json;
+    for (auto ch : buff) {
+        json << ch;
     }
+    boost::property_tree::ptree root;
+    boost::property_tree::read_json(json, root);
 
     return root;
 }

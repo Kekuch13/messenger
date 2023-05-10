@@ -21,7 +21,7 @@ private:
     net::io_context ioc{1};
     tcp::acceptor acceptor;
     DatabaseManager dbManager;
-    std::unordered_map<std::string, std::shared_ptr<tcp::socket>> clients;
+    std::unordered_map<std::string, std::shared_ptr<tcp::socket>> clients; // подключившиеся клиенты(username и socket)
 public:
     explicit Server(int port);
     void Run();
