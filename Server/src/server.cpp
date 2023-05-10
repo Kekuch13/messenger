@@ -25,15 +25,16 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) { // сесси
     try {
         boost::system::error_code ec;
         while (true) {
+            socket->wait(socket->wait_read);
             size_t bytes = socket->available();
-            if (bytes == 0) continue;
             std::vector<char> buff(bytes);
             socket->read_some(net::buffer(buff.data(), buff.size()), ec);
 
-            if (ec == net::error::eof) {
+            if (buff.size() == 0) {
                 break;
             } else if (ec) {
-                throw boost::system::system_error(ec);
+                std::cerr << "Fail on reading: " << ec.what() << std::endl;
+                break;
             }
 
             boost::property_tree::ptree root;

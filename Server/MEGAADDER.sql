@@ -29,20 +29,19 @@ create table messages
 );
 
 INSERT INTO users(username, password)
-    VALUES ('keke', 'keke'),
-           ('lolo','lolo'),
-           ('11111','11111'),
+    VALUES ('anna', 'anna'),
+           ('maria','maria'),
+           ('ivan','ivan'),
            ('john','john'),
-           ('artist','artist'),
+           ('donald','donald'),
            ('nick','nick');
 
 INSERT INTO dialogs(username_1, username_2)
-    VALUES ('keke', 'john'),
-           ('11111', 'john'),
-           ('keke', 'lolo'),
-           ('artist', '11111'),
-           ('artist', 'john'),
-           ('lolo', 'nick'),
-           ('nick', 'keke');
-
-INSERT INTO messages(dialog_id, author, text)
+    VALUES ('anna', 'john'),
+           ('donald', 'john'),
+           ('ivan', 'anna'),
+           ('nick', 'donald'),
+           ('maria', 'john'),
+           ('maria', 'nick'),
+           ('nick', 'ivan'),
+           ('donald', 'anna');

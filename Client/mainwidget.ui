@@ -23,14 +23,14 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="authorization">
     <widget class="QGroupBox" name="groupBox">
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>150</y>
+       <y>130</y>
        <width>400</width>
        <height>340</height>
       </rect>
@@ -41,7 +41,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Авторизация</string>
+      <string>Вход</string>
      </property>
      <widget class="QPushButton" name="enterButton">
       <property name="geometry">
