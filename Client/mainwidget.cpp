@@ -56,7 +56,13 @@ void MainWidget::receiveMessage() // обработчик поступивших
                 dialogs[user] = it->second.get<int>("id");
                 ui->dialogsList->addItem(user.c_str());
             }
-        } else if (responseName == "NewDialogs") {
+        } /*else if (responseName == "addNewMessage") {
+                if (openDialogs.contains(root.get<int>("dialog_id"))) {
+                    openDialogs[root.get<int>("dialog_id")]->addMessage(root.get<std::string>("author") + ": " + root.get<std::string>("text"));
+                }
+                emit conn->readyRead();
+            }*/
+        else if (responseName == "NewDialogs") {
             auto dialogsNode = root.get_child("dialogs");
             for (auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
                 std::string user = it->second.data();

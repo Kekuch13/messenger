@@ -136,6 +136,21 @@ void Server::requestHandler(boost::property_tree::ptree &root) { // обрабо
             worker.exec_prepared("addMessage", dialog_id, username, text);
             worker.commit();
 
+//            pqxx::result res = worker.exec_prepared("findRecipient", dialog_id, username);
+//            worker.commit();
+//            auto recipient = res[0]["recipient"].as<std::string>();
+//            if (clients.contains(recipient)) {
+//                boost::property_tree::ptree ptree;
+//                ptree.put("responseName", "addNewMessage");
+//                ptree.put("author", username);
+//                ptree.put("dialog_id", dialog_id);
+//                ptree.put("text", text);
+//
+//                std::stringstream data;
+//                boost::property_tree::write_json(data, ptree);
+//                sendResponse(clients[recipient], data.str());
+//            }
+
             sendResponse(clients[username], "{\n\t\"responseName\":\"success\"\n}");
         } else if (requestName == "getNewDialogs") {
             pqxx::work worker(dbManager.GetConn());
