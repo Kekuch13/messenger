@@ -34,7 +34,7 @@ void DatabaseManager::prepare_statements() { // SQL-запросы, исполь
                                   "SELECT username_2 AS recipient\n"
                                   "FROM dialogs INNER JOIN messages m on dialogs.id = m.dialog_id\n"
                                   "WHERE dialogs.id = $1 AND author = $2 AND username_1 = $2");
-    conn.prepare("dialogMessages", "SELECT author, text FROM messages WHERE dialog_id=$1 ORDER BY time ASC");
+    conn.prepare("dialogMessages", "SELECT author, text FROM messages WHERE dialog_id=$1 ORDER BY date, time ASC");
 }
 
 pqxx::connection &DatabaseManager::GetConn() {

@@ -22,6 +22,7 @@ create table messages
     id serial primary key,
     dialog_id int not null,
     author varchar(50) not null,
+    date date default CURRENT_DATE not null,
     time time default CURRENT_TIME not null,
     text varchar(250) not null,
     CONSTRAINT dialog FOREIGN KEY (dialog_id) REFERENCES dialogs (id) ON DELETE CASCADE,
