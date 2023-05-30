@@ -8,6 +8,7 @@ Connection::Connection(std::string adress, int port) : socket(ioc), buff(20*1024
         net::connect(socket, endpoints);
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
+        throw;
     }
 }
 

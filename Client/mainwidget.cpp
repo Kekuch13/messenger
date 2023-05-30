@@ -3,19 +3,24 @@
 #include <QDebug>
 
 #include <thread>
+#include <QMessageBox>
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::MainWidget)
     {
-    conn = new Connection("127.0.0.1", 13);
+    try {
+        conn = new Connection("127.0.0.1", 13);
+        ui->setupUi(this);
+        ui->stackedWidget->setCurrentIndex(0);
+        ui->passwordLine->setEchoMode(QLineEdit::Password);
 
-    ui->setupUi(this);
-    ui->stackedWidget->setCurrentIndex(0);
-    ui->passwordLine->setEchoMode(QLineEdit::Password);
+        connect(this, &MainWidget::setWidget, this, &MainWidget::changeWindow);
+        connect(this, &MainWidget::newDialog, this, &MainWidget::createDialog);
 
-    connect(this, &MainWidget::setWidget, this, &MainWidget::changeWindow);
-    connect(this, &MainWidget::newDialog, this, &MainWidget::createDialog);
-    std::thread([this] {return this->receiveMessage();}).detach();
+        std::thread([this] {return this->receiveMessage();}).detach();
+    } catch (std::exception &e) {
+        QMessageBox::critical(this, "Ошибка", "Упс... Возникли проблемы с подключением к серверу");
+    }
 }
 
 MainWidget::~MainWidget()
