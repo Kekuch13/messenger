@@ -21,24 +21,22 @@ public:
 private:
     void loadMessages(int dialog_id);
 
+signals:
+    void setWidget(int idx);
+    void newDialog(QWidget* parent, int id, std::string username, Connection* conn);
+
 private slots:
     void on_showPassword_stateChanged(int arg1);
-
     void on_enterButton_clicked();
-
     void receiveMessage();
-
     void on_dialogButton_clicked();
-
     void on_registrationButton_clicked();
-
     void on_createAccountButton_clicked();
-
     void on_homeButton_clicked();
-
     void on_newDialogButton_clicked();
-
     void on_tabWidget_tabCloseRequested(int index);
+    void changeWindow(int idx);
+    void createDialog(QWidget* parent, int id, std::string username, Connection* conn);
 
 private:
     Connection* conn;

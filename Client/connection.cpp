@@ -1,6 +1,6 @@
 #include "connection.h"
 
-Connection::Connection(std::string adress, int port) : socket(ioc)
+Connection::Connection(std::string adress, int port) : socket(ioc), buff(20*1024)
 {
     try {
         tcp::resolver resolver(ioc);
@@ -33,8 +33,6 @@ void Connection::sendToServer(std::unordered_map<std::string, std::string> &data
     std::string msg = toJson(data);
     boost::system::error_code ec;
     socket.write_some(net::buffer(msg.data(), msg.size()), ec);
-
-    emit readyRead();
 }
 
 boost::property_tree::ptree Connection::receiveFromServer() // прием ответов от сервера
@@ -46,7 +44,7 @@ boost::property_tree::ptree Connection::receiveFromServer() // прием отв
 
     socket.read_some(net::buffer(buff.data(), buff.size()), ec);
 
-    // перевод поступившего сообщения из json в boost::property_tree для дельнейшей обработки
+// перевод поступившего сообщения из json в boost::property_tree для дельнейшей обработки
     std::stringstream json;
     for (auto ch : buff) {
         json << ch;
@@ -55,4 +53,8 @@ boost::property_tree::ptree Connection::receiveFromServer() // прием отв
     boost::property_tree::read_json(json, root);
 
     return root;
+}
+
+std::string Connection::foo() {
+    return "foo";
 }

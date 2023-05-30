@@ -14,10 +14,11 @@ class Dialog : public QWidget
     Q_OBJECT
 
 public:
-    Dialog(QWidget *parent, int id, std::string username, Connection*& conn);
+    Dialog(QWidget *parent, int id, std::string username, Connection* conn);
     ~Dialog();
 
     void addMessage(std::string msg);
+    void scrollToBottom();
 
 private slots:
     void on_sendButton_clicked();

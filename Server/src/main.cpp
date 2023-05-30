@@ -4,7 +4,7 @@
 int main() {
     try {
         Server server(13);
-        server.Run();
+        server.run();
     } catch (std::exception &e) {
         std::cerr << e.what();
     }

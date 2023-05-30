@@ -23,6 +23,8 @@ private:
     tcp::socket socket;
     tcp::resolver::results_type endpoints;
 
+    std::vector<char> buff;
+
 public:
     Connection(std::string adress, int port);
     ~Connection();
@@ -30,9 +32,7 @@ public:
     void sendToServer(std::unordered_map<std::string, std::string>& data);
     boost::property_tree::ptree receiveFromServer();
     std::string toJson(std::unordered_map<std::string, std::string>& data);
-
-signals:
-    void readyRead();
+    std::string foo();
 };
 
 #endif // CONNECTION_H

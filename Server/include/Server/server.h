@@ -24,9 +24,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<tcp::socket>> clients; // подключившиеся клиенты(username и socket)
 public:
     explicit Server(int port);
-    void Run();
+    void run();
 private:
-    void AcceptClients();
+    [[noreturn]] void AcceptClients();
     void session(const std::shared_ptr<tcp::socket> &socket);
     void requestHandler(boost::property_tree::ptree &root);
     void sendResponse(const std::shared_ptr<tcp::socket> &socket, std::string msg);

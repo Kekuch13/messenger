@@ -3,8 +3,9 @@
 
 Server::Server(int port) : acceptor(ioc, tcp::endpoint(tcp::v4(), port)) {}
 
-void Server::Run() { // запуск сервера
+void Server::run() { // запуск сервера
     try {
+        std::cout << "Server started\n";
         AcceptClients();
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
@@ -12,16 +13,17 @@ void Server::Run() { // запуск сервера
     }
 }
 
-void Server::AcceptClients() { // подключение новых клиентов
+[[noreturn]] void Server::AcceptClients() { // подключение новых клиентов
     while (true) {
         std::shared_ptr<tcp::socket> newConnection = std::make_shared<tcp::socket>(ioc);
-        acceptor.accept(*newConnection.get());
-        std::cout << "Client accepted!\n";
+        acceptor.accept(*newConnection);
+        std::cout << "Client accepted\n";
         std::thread([this, newConnection] { return this->session(newConnection); }).detach();
     }
 }
 
 void Server::session(const std::shared_ptr<tcp::socket> &socket) { // сессия для клиента
+    std::string username;
     try {
         boost::system::error_code ec;
         while (true) {
@@ -30,7 +32,7 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) { // сесси
             std::vector<char> buff(bytes);
             socket->read_some(net::buffer(buff.data(), buff.size()), ec);
 
-            if (buff.size() == 0) {
+            if (buff.empty()) {
                 break;
             } else if (ec) {
                 std::cerr << "Fail on reading: " << ec.what() << std::endl;
@@ -57,7 +59,8 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) { // сесси
                 worker.commit();
                 if (result.size() == 1) {
                     // добавляем клиента в список активных клтиентов, если успешно пройдена аутентификация
-                    clients[root.get<std::string>("login")] = socket;
+                    username = root.get<std::string>("login");
+                    clients[username] = socket;
                     sendResponse(socket, "{\n\t\"responseName\":\"authorization\",\n\t\"status\":\"success\"\n}");
                 } else {
                     sendResponse(socket, "{\n\t\"responseName\":\"authorization\",\n\t\"status\":\"fail\"\n}");
@@ -79,6 +82,7 @@ void Server::session(const std::shared_ptr<tcp::socket> &socket) { // сесси
                 requestHandler(root);
             }
         }
+        clients.erase(username);
         socket->shutdown(tcp::socket::shutdown_send, ec);
         if (ec) {
             throw boost::system::system_error(ec);
@@ -136,22 +140,20 @@ void Server::requestHandler(boost::property_tree::ptree &root) { // обрабо
             worker.exec_prepared("addMessage", dialog_id, username, text);
             worker.commit();
 
-//            pqxx::result res = worker.exec_prepared("findRecipient", dialog_id, username);
-//            worker.commit();
-//            auto recipient = res[0]["recipient"].as<std::string>();
-//            if (clients.contains(recipient)) {
-//                boost::property_tree::ptree ptree;
-//                ptree.put("responseName", "addNewMessage");
-//                ptree.put("author", username);
-//                ptree.put("dialog_id", dialog_id);
-//                ptree.put("text", text);
-//
-//                std::stringstream data;
-//                boost::property_tree::write_json(data, ptree);
-//                sendResponse(clients[recipient], data.str());
-//            }
+            pqxx::result res = worker.exec_prepared("findRecipient", dialog_id, username);
+            worker.commit();
+            auto recipient = res[0]["recipient"].as<std::string>();
+            if (clients.contains(recipient)) {
+                boost::property_tree::ptree ptree;
+                ptree.put("responseName", "addNewMessage");
+                ptree.put("author", username);
+                ptree.put("dialog_id", dialog_id);
+                ptree.put("text", text);
 
-            sendResponse(clients[username], "{\n\t\"responseName\":\"success\"\n}");
+                std::stringstream data;
+                boost::property_tree::write_json(data, ptree);
+                sendResponse(clients[recipient], data.str());
+            }
         } else if (requestName == "getNewDialogs") {
             pqxx::work worker(dbManager.GetConn());
             auto result = worker.exec_prepared("newDialogs", username);

@@ -1,5 +1,8 @@
 #include "mainwidget.h"
 #include "./ui_mainwidget.h"
+#include <QDebug>
+
+#include <thread>
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::MainWidget)
@@ -10,7 +13,9 @@ MainWidget::MainWidget(QWidget *parent)
     ui->stackedWidget->setCurrentIndex(0);
     ui->passwordLine->setEchoMode(QLineEdit::Password);
 
-    connect(conn, SIGNAL(readyRead()), this, SLOT(receiveMessage()));
+    connect(this, &MainWidget::setWidget, this, &MainWidget::changeWindow);
+    connect(this, &MainWidget::newDialog, this, &MainWidget::createDialog);
+    std::thread([this] {return this->receiveMessage();}).detach();
 }
 
 MainWidget::~MainWidget()
@@ -19,77 +24,87 @@ MainWidget::~MainWidget()
     delete ui;
 }
 
+void MainWidget::changeWindow(int idx) {
+    ui->stackedWidget->setCurrentIndex(idx);
+}
+
+void MainWidget::createDialog(QWidget *parent, int id, std::string username, Connection* conn) {
+    QListWidgetItem *item = ui->newDialogsList->currentItem();
+    Dialog *dialog = new Dialog(parent, id, username, conn);
+
+    ui->tabWidget->insertTab(ui->tabWidget->count(), dialog, item->text());
+    openDialogs[id] = dialog;
+    ui->newDialogsList->takeItem(ui->newDialogsList->row(item));
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+}
+
 void MainWidget::receiveMessage() // обработчик поступивших запросов от сервера
 {
-    try {
-        boost::property_tree::ptree root = conn->receiveFromServer();
-        std::string responseName = root.get<std::string>("responseName");
+    while (true) {
+        try {
+            boost::property_tree::ptree root = conn->receiveFromServer();
+            std::string responseName = root.get<std::string>("responseName");
 
-        if (responseName == "authorization") {
-            if (root.get<std::string>("status") == "success") {
-                username = ui->loginLine->text().toStdString();
-                std::unordered_map<std::string, std::string> data;
-                data["requestName"] = "getDialogs";
-                data["username"] = username;
-                conn->sendToServer(data);
+            if (responseName == "authorization") {
+                if (root.get<std::string>("status") == "success") {
+                    username = ui->loginLine->text().toStdString();
+                    std::unordered_map<std::string, std::string> data;
+                    data["requestName"] = "getDialogs";
+                    data["username"] = username;
+                    conn->sendToServer(data);
 
-                data.clear();
-                data["requestName"] = "getNewDialogs";
-                data["username"] = username;
-                conn->sendToServer(data);
+                    data.clear();
+                    data["requestName"] = "getNewDialogs";
+                    data["username"] = username;
+                    conn->sendToServer(data);
 
-                ui->stackedWidget->setCurrentIndex(1);
-            } else {
-                ui->label_3->setText("Неверный логин/пароль");
-            }
-        } else if (responseName == "registration") {
-            if (root.get<std::string>("status") == "success") {
-                ui->stackedWidget->setCurrentIndex(0);
-                ui->label_3->setText("Аккаунт успешно создан");
-            } else {
-                ui->label_8->setText("Логин занят");
-            }
-        } else if (responseName == "dialogs") {
-            auto dialogsNode = root.get_child("dialogs");
-            for (auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
-                std::string user = it->second.get<std::string>("username");
-                dialogs[user] = it->second.get<int>("id");
-                ui->dialogsList->addItem(user.c_str());
-            }
-        } /*else if (responseName == "addNewMessage") {
+                    emit setWidget(1);
+                } else {
+                    ui->label_3->setText("Неверный логин/пароль");
+                }
+            } else if (responseName == "registration") {
+                if (root.get<std::string>("status") == "success") {
+                    emit setWidget(0);
+                    ui->label_3->setText("Аккаунт успешно создан");
+                } else {
+                    ui->label_8->setText("Логин занят");
+                }
+            } else if (responseName == "dialogs") {
+                auto dialogsNode = root.get_child("dialogs");
+                for (auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
+                    std::string user = it->second.get<std::string>("username");
+                    dialogs[user] = it->second.get<int>("id");
+                    ui->dialogsList->addItem(user.c_str());
+                }
+            } else if (responseName == "addNewMessage") {
                 if (openDialogs.contains(root.get<int>("dialog_id"))) {
                     openDialogs[root.get<int>("dialog_id")]->addMessage(root.get<std::string>("author") + ": " + root.get<std::string>("text"));
                 }
-                emit conn->readyRead();
-            }*/
-        else if (responseName == "NewDialogs") {
-            auto dialogsNode = root.get_child("dialogs");
-            for (auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
-                std::string user = it->second.data();
-                ui->newDialogsList->addItem(user.c_str());
+            } else if (responseName == "NewDialogs") {
+                auto dialogsNode = root.get_child("dialogs");
+                for (auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
+                    std::string user = it->second.data();
+                    ui->newDialogsList->addItem(user.c_str());
+                }
+            } else if (responseName == "createdDialog") {
+                int id = root.get<int>("dialog_id");
+                emit newDialog(this, id, username, conn);
+            } else if (responseName == "dialogMessages") {
+                int id = root.get<int>("dialog_id");
+                boost::property_tree::ptree dialogsNode = root.get_child("messages");
+                for (auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
+                    std::string author = it->second.get<std::string>("author");
+                    std::string text = it->second.get<std::string>("text");
+                    qDebug() << author + ": " + text;
+                    openDialogs[id]->addMessage(author + ": " + text);
+                }
+                openDialogs[id]->scrollToBottom();
             }
-        } else if (responseName == "createdDialog") {
-            int id = root.get<int>("dialog_id");
-            QListWidgetItem *item = ui->newDialogsList->currentItem();
-            Dialog *dialog = new Dialog(this, id, username, conn);
-
-            ui->tabWidget->insertTab(ui->tabWidget->count(), dialog, item->text());
-            openDialogs[id] = dialog;
-            ui->newDialogsList->takeItem(ui->newDialogsList->row(item));
-            ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
-        } else if (responseName == "dialogMessages") {
-            int id = root.get<int>("dialog_id");
-            auto dialogsNode = root.get_child("messages");
-            for (auto it = dialogsNode.begin(); it != dialogsNode.end(); ++it) {
-                std::string author = it->second.get<std::string>("author");
-                std::string text = it->second.get<std::string>("text");
-                openDialogs[id]->addMessage(author + ": " + text);
-            }
-        } else if (responseName == "success") {
-            // заглушка, как и сам ответ от сервера с именем success
-        }        
-    } catch (std::exception &e) {
-        ui->label_4->setText(e.what());
+        } catch (std::exception &e) {
+            qDebug() << e.what();
+            ui->label_3->setText(e.what());
+            ui->label_4->setText(e.what());
+        }
     }
 }
 
