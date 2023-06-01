@@ -20,28 +20,28 @@
 - Cmake версии 3.5 или новее
 
 Для настройки проекта необходимо:
-- Создать базу данных postrgesql “messenger”
+- Создать базу данных postrgesql `messenger`
 - Запустить для создания структуры БД файл `MEGAADDER.sql`
 (содержится в проекте Server)
 - Указать свои данные, используемые для подключения к БД, в
-файле databaseManager.h
+файле `databaseManager.h`
 - Для изменения порта необходимо:
     - Изменить аргумент конструктора объекта Server в файле `main.cpp` проекта Server
     - Изменить аргумент конструктора объекта Connection в
-конструкторе Mainwidget в файле `mainwidget.cpp` проекта Client
+конструкторе `Mainwidget` в файле `mainwidget.cpp` проекта Client
 
 Описание структуры проекта:
 - Client содержит файлы:
     - `main.cpp` – главный файл
-    - `mainwidget.ui`, `mainwidget.h`, mainwidget.cpp` – файлы главного виджета
+    - `mainwidget.ui`, `mainwidget.h`, `mainwidget.cpp` – файлы главного виджета
     - `dialog.ui`, `dialog.h`, `dialog.cpp` – файлы виджета диалога
-    - `connection.h`, `connection.cpp` – класс Connection,
+    - `connection.h`, `connection.cpp` – класс `Connection`,
 обеспечивающий связь Клиента с Сервером
     - `CMakeLists.txt` – файл Cmake 
 - Server содержит файлы:
     - `main.cpp` – главный файл
     - `databaseManager.h`, `databaseManager.cpp` – класс DatabaseManager, отвечающий за связь Сервера с БД
-    - `server.h`, `server.cpp` – класс Server, отвечающий за связь с Клиентом и
+    - `server.h`, `server.cpp` – класс `Server`, отвечающий за связь с Клиентом и
 обработку поступающих запросов
     - `CMakeLists.txt` – файл Cmake
     - `MEGAADDER.sql` – файл, создающий структуру БД
