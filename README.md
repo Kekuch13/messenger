@@ -47,3 +47,14 @@
     - MEGAADDER.sql – файл, создающий структуру БД
 </details>
 
+Окно входа:
+![image](pics/1.png)
+
+Окно регистрации:
+![image](pics/2.png)
+
+Главный экран (диалоги):
+![image](pics/3.png)
+
+Диалог:
+![image](pics/4.png)
