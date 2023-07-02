@@ -1,7 +1,7 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 
-Dialog::Dialog(QWidget *parent, int id, std::string username, Connection* conn) :
+Dialog::Dialog(QWidget *parent, int id, std::string username, std::shared_ptr<Connection> conn) :
     QWidget(parent),
     ui(new Ui::Dialog),
     id(id),
