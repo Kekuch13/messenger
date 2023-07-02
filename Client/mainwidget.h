@@ -15,7 +15,7 @@ class MainWidget : public QWidget
     Q_OBJECT
 
 public:
-    MainWidget(QWidget *parent = nullptr);
+    MainWidget(QWidget *parent, std::shared_ptr<Connection> conn);
     ~MainWidget();
 
 private:
@@ -23,7 +23,7 @@ private:
 
 signals:
     void setWidget(int idx);
-    void newDialog(QWidget* parent, int id, std::string username, Connection* conn);
+    void newDialog(int id, std::string username);
 
 private slots:
     void on_showPassword_stateChanged(int arg1);
@@ -36,13 +36,13 @@ private slots:
     void on_newDialogButton_clicked();
     void on_tabWidget_tabCloseRequested(int index);
     void changeWindow(int idx);
-    void createDialog(QWidget* parent, int id, std::string username, Connection* conn);
+    void createDialog(int id, std::string username);
 
 private:
-    Connection* conn;
+    std::shared_ptr<Connection> conn;
     std::string username;
     Ui::MainWidget *ui;
     std::unordered_map<std::string, int> dialogs;
-    std::unordered_map<int, Dialog*> openDialogs;
+    std::unordered_map<int, std::shared_ptr<Dialog>> openDialogs;
 };
 #endif // MAINWIDGET_H

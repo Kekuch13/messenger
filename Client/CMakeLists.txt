@@ -23,6 +23,7 @@ set(PROJECT_SOURCES
         dialog.h
         dialog.cpp
         dialog.ui
+        config.json
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -65,6 +66,8 @@ install(TARGETS Client
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(Client)

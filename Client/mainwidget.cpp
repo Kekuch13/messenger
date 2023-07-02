@@ -5,11 +5,10 @@
 #include <thread>
 #include <QMessageBox>
 
-MainWidget::MainWidget(QWidget *parent)
-    : QWidget(parent), ui(new Ui::MainWidget)
+MainWidget::MainWidget(QWidget *parent, std::shared_ptr<Connection> conn)
+    : QWidget(parent), ui(new Ui::MainWidget), conn(conn)
     {
     try {
-        conn = new Connection("127.0.0.1", 13);
         ui->setupUi(this);
         ui->stackedWidget->setCurrentIndex(0);
         ui->passwordLine->setEchoMode(QLineEdit::Password);
@@ -25,7 +24,6 @@ MainWidget::MainWidget(QWidget *parent)
 
 MainWidget::~MainWidget()
 {
-    delete conn;
     delete ui;
 }
 
@@ -33,11 +31,11 @@ void MainWidget::changeWindow(int idx) {
     ui->stackedWidget->setCurrentIndex(idx);
 }
 
-void MainWidget::createDialog(QWidget *parent, int id, std::string username, Connection* conn) {
+void MainWidget::createDialog(int id, std::string username) {
     QListWidgetItem *item = ui->newDialogsList->currentItem();
-    Dialog *dialog = new Dialog(parent, id, username, conn);
+    auto dialog = std::make_shared<Dialog>(this, id, username, conn);
 
-    ui->tabWidget->insertTab(ui->tabWidget->count(), dialog, item->text());
+    ui->tabWidget->insertTab(ui->tabWidget->count(), dialog.get(), item->text());
     openDialogs[id] = dialog;
     ui->newDialogsList->takeItem(ui->newDialogsList->row(item));
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
@@ -93,7 +91,7 @@ void MainWidget::receiveMessage() // обработчик поступивших
                 }
             } else if (responseName == "createdDialog") {
                 int id = root.get<int>("dialog_id");
-                emit newDialog(this, id, username, conn);
+                emit newDialog(id, username);
             } else if (responseName == "dialogMessages") {
                 int id = root.get<int>("dialog_id");
                 boost::property_tree::ptree dialogsNode = root.get_child("messages");
@@ -150,9 +148,9 @@ void MainWidget::on_dialogButton_clicked() // обработчик кнопки 
     }
 
     int id = dialogs[item->text().toStdString()];
-    Dialog *dialog = new Dialog(this, id, username, conn);
+    auto dialog = std::make_shared<Dialog>(this, id, username, conn);
 
-    ui->tabWidget->insertTab(ui->tabWidget->count(), dialog, item->text());
+    ui->tabWidget->insertTab(ui->tabWidget->count(), dialog.get(), item->text());
     openDialogs[id] = dialog;
     ui->dialogsList->takeItem(ui->dialogsList->row(item));
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
@@ -199,8 +197,8 @@ void MainWidget::on_newDialogButton_clicked() // обработчик кнопк
 void MainWidget::on_tabWidget_tabCloseRequested(int index) // обработчик закрытия вкладок с диалогами
 {
     if (index != 0) { // вкладку для выбора диалогов нельзя закрыть
-        for (auto&[id, d] : openDialogs) {
-            if (ui->tabWidget->indexOf(d) == index) {
+        for (auto& [id, dialog] : openDialogs) {
+            if (ui->tabWidget->indexOf(dialog.get()) == index) {
                 std::string name = ui->tabWidget->tabText(index).toStdString();
                 dialogs[name] = id;
                 ui->dialogsList->addItem(name.c_str());

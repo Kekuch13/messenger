@@ -14,7 +14,7 @@
 namespace net = boost::asio;
 using boost::asio::ip::tcp;
 
-class Connection : public QObject
+class Connection : public QObject, std::enable_shared_from_this<Connection>
 {
     Q_OBJECT
 
