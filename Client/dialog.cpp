@@ -44,3 +44,8 @@ void Dialog::scrollToBottom()
     QListWidgetItem* item = ui->messagesList->item(ui->messagesList->count()-1);
     ui->messagesList->scrollToItem(item);
 }
+
+const int& Dialog::getId() const
+{
+    return id;
+}

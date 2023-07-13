@@ -196,17 +196,12 @@ void MainWidget::on_newDialogButton_clicked() // обработчик кнопк
 
 void MainWidget::on_tabWidget_tabCloseRequested(int index) // обработчик закрытия вкладок с диалогами
 {
-    if (index != 0) { // вкладку для выбора диалогов нельзя закрыть
-        for (auto& [id, dialog] : openDialogs) {
-            if (ui->tabWidget->indexOf(dialog.get()) == index) {
-                std::string name = ui->tabWidget->tabText(index).toStdString();
-                dialogs[name] = id;
-                ui->dialogsList->addItem(name.c_str());
-                openDialogs.erase(id);
-                break;
-            }
-        }
-        ui->tabWidget->removeTab(index);
+    auto curr = dynamic_cast<Dialog*>(ui->tabWidget->widget(index));
+    if(curr) {
+        std::string name = ui->tabWidget->tabText(index).toStdString();
+        dialogs[name] = curr->getId();
+        ui->dialogsList->addItem(name.c_str());
+        openDialogs.erase(curr->getId());
     }
 }
 

@@ -20,6 +20,8 @@ public:
     void addMessage(std::string msg);
     void scrollToBottom();
 
+    const int& getId() const;
+
 private slots:
     void on_sendButton_clicked();
 
